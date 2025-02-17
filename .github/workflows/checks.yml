@@ -1,0 +1,32 @@
+name: Checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+env:
+  SSH_PUB_KEY:
+    ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIKzKKT5xCssZ38UI5VWaPOqW3ldVsg/0tDceTrCFnsd3 github.action@antoinebellanger.fr
+
+jobs:
+  mirror:
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          known_hosts: $SSH_PUB_KEY
+
+      - name: Push to epitech
+        run: |
+          git fetch --unshallow origin
+          git remote add epitech "${{ secrets.MIRROR_REPO }}"
+          git push --force epitech main:fix-ci-2
+          git push --force epitech main:main
