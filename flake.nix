@@ -24,6 +24,7 @@
             valgrind
             inetutils
             filezilla
+            inetutils
           ] ++ deps;
         };
 
