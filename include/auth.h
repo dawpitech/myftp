@@ -9,6 +9,7 @@
     #define AUTH_H
 
     #include <stdbool.h>
+    #include <stddef.h>
 
     #define MAX_USERNAME 64
     #define MAX_PASSWORD 256
