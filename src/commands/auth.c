@@ -33,8 +33,8 @@ void cmd_user_handler(client_t *client, const char *username)
         return;
     }
     client->is_auth = true;
-    write_msg_to_client(client->control_fd, "230 User logged in, proceed.");
     printf("[INFO] USER %s LOGGED IN\n", client->username);
+    write_msg_to_client(client->control_fd, "230 User logged in, proceed.");
 }
 
 void cmd_pass_handler(client_t *client, const char *password)
