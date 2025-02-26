@@ -22,6 +22,8 @@
             gcovr
             ltrace
             valgrind
+            inetutils
+            filezilla
           ] ++ deps;
         };
 
