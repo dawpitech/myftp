@@ -28,7 +28,7 @@ void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
     }
     getsockname(client->data_fd, (struct sockaddr*) &client->data_sock, &len);
     listen(client->data_fd, 1);
-    printf("[INFO] Port %d opened for client data transport\n",
+    printf("[INFO] Port %d opened for passive data transport\n",
         ntohs(client->data_sock.sin_port));
     snprintf((char *) &msg_buf, BUFSIZ, "227 Entering Passive Mode "
         "(127,0,0,1,%d,%d)", ntohs(client->data_sock.sin_port / 256),
@@ -38,9 +38,14 @@ void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
 
 void ls_child(const client_t *client, const char *args)
 {
-    FILE *ls = popen("ls -l", "r");
-    int chr = fgetc(ls);
+    FILE *ls;
+    int chr;
+    char shell_buff[BUFSIZ];
 
+    snprintf((char *) &shell_buff, BUFSIZ, "ls -l %s/%s",
+        client->currPath, args);
+    ls = popen(shell_buff, "r");
+    chr = fgetc(ls);
     while (chr != EOF) {
         write(client->data_trf_fd, &chr, 1);
         chr = fgetc(ls);
@@ -73,9 +78,14 @@ void cmd_list_handler(client_t *client, const char *args)
 
 void retr_child(const client_t *client, const char *args)
 {
-    FILE *content = fopen("Makefile", "r");
-    int chr = fgetc(content);
+    FILE *content;
+    int chr;
+    char filename_buff[BUFSIZ];
 
+    snprintf((char *) &filename_buff, BUFSIZ, "%s/%s",
+        client->currPath, args);
+    content = fopen(filename_buff, "r");
+    chr = fgetc(content);
     while (chr != EOF) {
         write(client->data_trf_fd, &chr, 1);
         chr = fgetc(content);
