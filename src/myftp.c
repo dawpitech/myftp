@@ -30,6 +30,7 @@ int main(const int argc, const char *argv[])
 {
     server_t server = {0};
 
+    setenv("LC_ALL", "C", 1);
     if (argc != 3)
         return EXIT_FAILURE_TEK;
     if (strcmp(argv[1], "-help") == 0)
