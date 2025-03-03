@@ -67,6 +67,11 @@ static const command_t COMMANDS[] = {
     {"RETR", cmd_retr_handler, true},
     {"CDUP", cmd_cdup_handler, true},
     {"CWD", cmd_cwd_handler, true},
+    {"NOOP", NULL, false},
+    {"HELP", NULL, false},
+    {"DELE", NULL, true},
+    {"PORT", NULL, true},
+    {"STOR", NULL, true},
 };
 static const size_t COMMANDS_SIZE = sizeof(COMMANDS) / sizeof(command_t);
 #endif //SERVER_H
