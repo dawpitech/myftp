@@ -16,6 +16,8 @@
 
 #include "server.h"
 
+#include <stdlib.h>
+
 static client_t *get_empty_client_slot(server_t *server)
 {
     for (int i = 0; i < SERVER_MAX_CLIENTS; i++)
@@ -40,7 +42,7 @@ static void searching_new_clients(server_t *server)
             (struct sockaddr*) &client_addr, &client_len);
         client->data_fd = -1;
         strcpy(client->username, "");
-        strcpy(client->currPath, server->anonymous_default_path);
+        strcpy(client->currPath, realpath(server->anonymous_default_path, NULL));
         printf("[INFO] New client connection\n");
         write_msg_to_client(client->control_fd, "220 Ready to server user.");
     }
@@ -51,6 +53,10 @@ static bool client_cmd_handler(const command_t *command, const char *buffer,
 {
     if (strncmp(command->name, buffer, strlen(command->name)) != 0)
         return false;
+    if (command->handler == NULL) {
+        write_msg_to_client(client->control_fd, "502 Not yet implemented");
+        return true;
+    }
     if (command->need_auth && !client->is_auth) {
         write_msg_to_client(client->control_fd, "530 Not logged in.");
         return true;
@@ -77,7 +83,7 @@ static void reply_client(client_t *client)
             break;
         }
     if (!cmd_found)
-        write_msg_to_client(client->control_fd, "502 Not yet implemented");
+        write_msg_to_client(client->control_fd, "500 Syntax Error");
 }
 
 static void update_client_data_fd(client_t *client)
