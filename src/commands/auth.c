@@ -50,7 +50,7 @@ void cmd_pass_handler(client_t *client, const char *password)
     write_msg_to_client(client->control_fd, "230 User logged in, proceed.");
 }
 
-void cmd_quit_handler(const client_t *client,
+void cmd_quit_handler(client_t *client,
     __attribute__((unused)) const char *_)
 {
     close(client->control_fd);

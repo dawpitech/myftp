@@ -10,16 +10,16 @@
 
     #include <auth.h>
     #include <stdbool.h>
+#include <linux/limits.h>
     #include <netinet/ip.h>
 
     #define CRLF "\r\n"
 
     #define SERVER_MAX_CLIENTS 32
-    #define MAX_PATH 256
 
 typedef struct {
     char username[MAX_USERNAME];
-    char currPath[MAX_PATH];
+    char currPath[PATH_MAX];
     int control_fd;
     struct sockaddr_in control_sock;
     int data_fd;
@@ -31,7 +31,7 @@ typedef struct {
 typedef struct {
     int server_fd;
     unsigned short port;
-    char anonymous_default_path[MAX_PATH];
+    char anonymous_default_path[PATH_MAX];
     client_t clients[SERVER_MAX_CLIENTS];
 } server_t;
 
@@ -55,7 +55,7 @@ void cmd_list_handler(client_t *client, const char *args);
 void cmd_retr_handler(client_t *client, const char *args);
 void cmd_cdup_handler(client_t *client, const char *_);
 void cmd_cwd_handler(client_t *client, const char *args);
-void cmd_noop_handler(const client_t *client, const char *_);
+void cmd_noop_handler(client_t *client, const char *_);
 
 static const command_t COMMANDS[] = {
     {"USER", cmd_user_handler, false},
