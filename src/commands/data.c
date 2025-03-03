@@ -31,8 +31,8 @@ void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
     printf("[INFO] Port %d opened for passive data transport\n",
         ntohs(client->data_sock.sin_port));
     snprintf((char *) &msg_buf, BUFSIZ, "227 Entering Passive Mode "
-        "(127,0,0,1,%d,%d)", ntohs(client->data_sock.sin_port / 256),
-        ntohs(client->data_sock.sin_port % 256));
+        "(127,0,0,1,%d,%d)", ntohs(client->data_sock.sin_port) / 256,
+        ntohs(client->data_sock.sin_port) % 256);
     write_msg_to_client(client->control_fd, msg_buf);
 }
 
@@ -64,7 +64,7 @@ void cmd_list_handler(client_t *client, const char *args)
         return;
     }
     write_msg_to_client(client->control_fd,
-        "125 Data connection already open; starting transfer.");
+        "150 Data connection already open; starting transfer.");
     pid = fork();
     if (pid == 0)
         ls_child(client, args);
@@ -104,7 +104,7 @@ void cmd_retr_handler(client_t *client, const char *args)
         return;
     }
     write_msg_to_client(client->control_fd,
-        "125 Data connection already open; starting transfer.");
+        "150 Data connection already open; starting transfer.");
     pid = fork();
     if (pid == 0)
         retr_child(client, args);

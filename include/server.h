@@ -53,6 +53,8 @@ void cmd_type_handler(client_t *client, const char *type);
 void cmd_pasv_handler(client_t *client, const char *_);
 void cmd_list_handler(client_t *client, const char *args);
 void cmd_retr_handler(client_t *client, const char *args);
+void cmd_cdup_handler(client_t *client, const char *_);
+void cmd_cwd_handler(client_t *client, const char *args);
 
 static const command_t COMMANDS[] = {
     {"USER", cmd_user_handler, false},
@@ -62,7 +64,9 @@ static const command_t COMMANDS[] = {
     {"TYPE", cmd_type_handler, true},
     {"PASV", cmd_pasv_handler, true},
     {"LIST", cmd_list_handler, true},
-    {"RETR", cmd_retr_handler, true}
+    {"RETR", cmd_retr_handler, true},
+    {"CDUP", cmd_cdup_handler, true},
+    {"CWD", cmd_cwd_handler, true},
 };
 static const size_t COMMANDS_SIZE = sizeof(COMMANDS) / sizeof(command_t);
 #endif //SERVER_H
