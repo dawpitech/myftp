@@ -51,7 +51,7 @@ static void searching_new_clients(server_t *server)
 static bool client_cmd_handler(const command_t *command, const char *buffer,
     client_t *client)
 {
-    if (strncmp(command->name, buffer, strlen(command->name)) != 0)
+    if (strncasecmp(command->name, buffer, strlen(command->name)) != 0)
         return false;
     if (command->handler == NULL) {
         write_msg_to_client(client->control_fd, "502 Not yet implemented");
