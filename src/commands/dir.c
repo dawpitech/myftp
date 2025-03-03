@@ -42,5 +42,6 @@ void cmd_cwd_handler(client_t *client, const char *args)
         strcpy(client->currPath, realpath_buff);
         free(realpath_buff);
     }
-    write_msg_to_client(client->control_fd, "250 Requested file action okay, completed.");
+    write_msg_to_client(client->control_fd,
+        "250 Requested file action okay, completed.");
 }

@@ -55,6 +55,7 @@ void cmd_list_handler(client_t *client, const char *args);
 void cmd_retr_handler(client_t *client, const char *args);
 void cmd_cdup_handler(client_t *client, const char *_);
 void cmd_cwd_handler(client_t *client, const char *args);
+void cmd_noop_handler(const client_t *client, const char *_);
 
 static const command_t COMMANDS[] = {
     {"USER", cmd_user_handler, false},
@@ -67,7 +68,7 @@ static const command_t COMMANDS[] = {
     {"RETR", cmd_retr_handler, true},
     {"CDUP", cmd_cdup_handler, true},
     {"CWD", cmd_cwd_handler, true},
-    {"NOOP", NULL, false},
+    {"NOOP", cmd_noop_handler, false},
     {"HELP", NULL, false},
     {"DELE", NULL, true},
     {"PORT", NULL, true},

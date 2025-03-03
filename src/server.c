@@ -42,7 +42,8 @@ static void searching_new_clients(server_t *server)
             (struct sockaddr*) &client_addr, &client_len);
         client->data_fd = -1;
         strcpy(client->username, "");
-        strcpy(client->currPath, realpath(server->anonymous_default_path, NULL));
+        strcpy(client->currPath, realpath(server->anonymous_default_path,
+            NULL));
         printf("[INFO] New client connection\n");
         write_msg_to_client(client->control_fd, "220 Ready to server user.");
     }
