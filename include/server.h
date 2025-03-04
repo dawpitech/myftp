@@ -56,6 +56,7 @@ void cmd_retr_handler(client_t *client, const char *args);
 void cmd_cdup_handler(client_t *client, const char *_);
 void cmd_cwd_handler(client_t *client, const char *args);
 void cmd_noop_handler(client_t *client, const char *_);
+void cmd_syst_handler(client_t *client, const char *_);
 
 static const command_t COMMANDS[] = {
     {"USER", cmd_user_handler, false},
@@ -73,6 +74,7 @@ static const command_t COMMANDS[] = {
     {"DELE", NULL, true},
     {"PORT", NULL, true},
     {"STOR", NULL, true},
+    {"SYST", cmd_syst_handler, false},
 };
 static const size_t COMMANDS_SIZE = sizeof(COMMANDS) / sizeof(command_t);
 #endif //SERVER_H

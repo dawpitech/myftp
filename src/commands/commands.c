@@ -31,3 +31,8 @@ void cmd_noop_handler(client_t *client, const char *_)
 {
     write_msg_to_client(client->control_fd, "200 'NOOP' OK.");
 }
+
+void cmd_syst_handler(client_t *client, const char *_)
+{
+    write_msg_to_client(client->control_fd, "215 UNIX system type.");
+}
