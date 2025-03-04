@@ -39,6 +39,7 @@ typedef struct {
     char name[32];
     void (*handler)(client_t *client, const char *params);
     bool need_auth;
+    char desc[64];
 } command_t;
 
 int init_server(server_t *server);
@@ -57,24 +58,41 @@ void cmd_cdup_handler(client_t *client, const char *_);
 void cmd_cwd_handler(client_t *client, const char *args);
 void cmd_noop_handler(client_t *client, const char *_);
 void cmd_syst_handler(client_t *client, const char *_);
+void cmd_help_handler(client_t *client, const char *args);
 
 static const command_t COMMANDS[] = {
-    {"USER", cmd_user_handler, false},
-    {"PASS", cmd_pass_handler, false},
-    {"QUIT", cmd_quit_handler, false},
-    {"PWD", cmd_pwd_handler, true},
-    {"TYPE", cmd_type_handler, true},
-    {"PASV", cmd_pasv_handler, true},
-    {"LIST", cmd_list_handler, true},
-    {"RETR", cmd_retr_handler, true},
-    {"CDUP", cmd_cdup_handler, true},
-    {"CWD", cmd_cwd_handler, true},
-    {"NOOP", cmd_noop_handler, false},
-    {"HELP", NULL, false},
-    {"DELE", NULL, true},
-    {"PORT", NULL, true},
-    {"STOR", NULL, true},
-    {"SYST", cmd_syst_handler, false},
+    {"USER", cmd_user_handler, false,
+        "Specify user for authentication"},
+    {"PASS", cmd_pass_handler, false,
+        "Specify password for authentication"},
+    {"QUIT", cmd_quit_handler, false,
+        "Drop current connection"},
+    {"PWD", cmd_pwd_handler, true,
+        "Print current path"},
+    {"TYPE", cmd_type_handler, true,
+        "Change formatting type of outputs"},
+    {"PASV", cmd_pasv_handler, true,
+        "Enable passive mode for data transfer"},
+    {"LIST", cmd_list_handler, true,
+        "List files in the current working directory"},
+    {"RETR", cmd_retr_handler, true,
+        "Retrieve a file from the server"},
+    {"CDUP", cmd_cdup_handler, true,
+        "Change working directory to parent directory"},
+    {"CWD", cmd_cwd_handler, true,
+        "Change working directory"},
+    {"NOOP", cmd_noop_handler, false,
+        "Do nothing"},
+    {"HELP", cmd_help_handler, false,
+        "Print this help message"},
+    {"DELE", NULL, true,
+        "Delete a file on the server"},
+    {"PORT", NULL, true,
+        "Enable active mode for data transfer"},
+    {"STOR", cmd_stor_handler, true,
+        "upload a file on the server"},
+    {"SYST", cmd_syst_handler, false,
+        "Print server system info"},
 };
 static const size_t COMMANDS_SIZE = sizeof(COMMANDS) / sizeof(command_t);
 #endif //SERVER_H
