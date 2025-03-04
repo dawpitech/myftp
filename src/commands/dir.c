@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <linux/limits.h>
 
 #include "server.h"
 
@@ -27,17 +28,22 @@ void cmd_cdup_handler(client_t *client, const char *_)
 
 void cmd_cwd_handler(client_t *client, const char *args)
 {
+    char new_path[PATH_MAX] = {0};
     char *realpath_buff;
 
     if (args[0] == '/') {
-        strcpy(client->currPath, realpath(client->currPath, NULL));
+        realpath_buff = realpath(args, NULL);
+        strcpy(client->currPath, realpath_buff);
+        free(realpath_buff);
     } else {
-        strcat(client->currPath, "/");
-        strcat(client->currPath, args);
-        realpath_buff = realpath(client->currPath, NULL);
+        strcpy(new_path, client->currPath);
+        strcat(new_path, "/");
+        strcat(new_path, args);
+        realpath_buff = realpath(new_path, NULL);
         if (realpath_buff == NULL) {
             perror("realpath");
             write_msg_to_client(client->control_fd, "553 Error occurred.");
+            return;
         }
         strcpy(client->currPath, realpath_buff);
         free(realpath_buff);
