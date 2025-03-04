@@ -58,6 +58,7 @@ void cmd_cdup_handler(client_t *client, const char *_);
 void cmd_cwd_handler(client_t *client, const char *args);
 void cmd_noop_handler(client_t *client, const char *_);
 void cmd_syst_handler(client_t *client, const char *_);
+void cmd_stor_handler(client_t *client, const char *args);
 void cmd_help_handler(client_t *client, const char *args);
 
 static const command_t COMMANDS[] = {
