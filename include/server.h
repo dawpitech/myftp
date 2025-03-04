@@ -60,6 +60,7 @@ void cmd_noop_handler(client_t *client, const char *_);
 void cmd_syst_handler(client_t *client, const char *_);
 void cmd_stor_handler(client_t *client, const char *args);
 void cmd_help_handler(client_t *client, const char *args);
+void cmd_port_handler(client_t *client, const char *args);
 
 static const command_t COMMANDS[] = {
     {"USER", cmd_user_handler, false,
@@ -88,12 +89,13 @@ static const command_t COMMANDS[] = {
         "Print this help message"},
     {"DELE", NULL, true,
         "Delete a file on the server"},
-    {"PORT", NULL, true,
+    {"PORT", cmd_port_handler, true,
         "Enable active mode for data transfer"},
     {"STOR", cmd_stor_handler, true,
         "upload a file on the server"},
     {"SYST", cmd_syst_handler, false,
         "Print server system info"},
+    {"LPRT", NULL, true, "Not yet implemented"}
 };
 static const size_t COMMANDS_SIZE = sizeof(COMMANDS) / sizeof(command_t);
 #endif //SERVER_H
