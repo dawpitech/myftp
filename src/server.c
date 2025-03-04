@@ -41,6 +41,7 @@ static void searching_new_clients(server_t *server)
         client->control_fd = accept(server->server_fd,
             (struct sockaddr*) &client_addr, &client_len);
         client->data_fd = -1;
+        client->data_trf_fd = -1;
         strcpy(client->username, "");
         strcpy(client->currPath, realpath(server->anonymous_default_path,
             NULL));
@@ -95,6 +96,8 @@ static void update_client_data_fd(client_t *client)
         .events = POLLIN
     };
 
+    if (client->data_fd == -1)
+        return;
     if (poll(&data_poll, 1, 10) == 0)
         return;
     client->data_trf_fd = accept(client->data_fd,

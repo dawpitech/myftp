@@ -15,7 +15,7 @@ CFLAGS	+=	-Wshadow
 CFLAGS	+=	-Wunreachable-code
 CFLAGS	+=	-Wmissing-prototypes
 CFLAGS	+=	-pedantic
-CFLAGS	+=	-I./include/
+CFLAGS	+=	-I./include/ -g3 -O1
 
 BDIR	=	.build
 

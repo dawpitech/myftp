@@ -58,7 +58,7 @@ void cmd_list_handler(client_t *client, const char *args)
     pid_t pid;
 
     (void) !args;
-    if (client->data_fd == -1) {
+    if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg_to_client(client->control_fd,
             "425 Rejecting data connection.");
         return;
@@ -69,11 +69,12 @@ void cmd_list_handler(client_t *client, const char *args)
     if (pid == 0)
         ls_child(client, args);
     waitpid(-pid, NULL, WUNTRACED);
+    printf("[INFO] Closing data transfer socket.\n");
+    write_msg_to_client(client->control_fd, "226 Closing data connection.");
     close(client->data_fd);
     close(client->data_trf_fd);
     client->data_fd = -1;
-    printf("[INFO] Closing data transfer socket.\n");
-    write_msg_to_client(client->control_fd, "226 Closing data connection.");
+    client->data_trf_fd = -1;
 }
 
 void retr_child(const client_t *client, const char *args)
@@ -98,7 +99,7 @@ void cmd_retr_handler(client_t *client, const char *args)
     pid_t pid;
 
     (void) !args;
-    if (client->data_fd == -1) {
+    if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg_to_client(client->control_fd,
             "425 Rejecting data connection.");
         return;
@@ -109,9 +110,10 @@ void cmd_retr_handler(client_t *client, const char *args)
     if (pid == 0)
         retr_child(client, args);
     waitpid(-pid, NULL, WUNTRACED);
+    printf("[INFO] Closing data transfer socket.\n");
+    write_msg_to_client(client->control_fd, "226 Closing data connection.");
     close(client->data_fd);
     close(client->data_trf_fd);
     client->data_fd = -1;
-    printf("[INFO] Closing data transfer socket.\n");
-    write_msg_to_client(client->control_fd, "226 Closing data connection.");
+    client->data_trf_fd = -1;
 }
