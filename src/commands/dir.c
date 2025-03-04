@@ -39,7 +39,7 @@ void compute_new_path(client_t *client, const char *path)
         strcat(new_path, path);
         realpath_buff = realpath(new_path, NULL);
         if (realpath_buff == NULL) {
-            write_msg_to_client(client->control_fd, "553 Error occurred.");
+            write_msg_to_client(client->control_fd, "550 Error occurred.");
             return;
         }
     }
