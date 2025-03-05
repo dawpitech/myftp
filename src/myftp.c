@@ -44,7 +44,7 @@ int main(const int argc, const char *argv[])
     strcpy(server.anonymous_default_path, argv[2]);
     if (init_server(&server) == -1)
         return EXIT_FAILURE_TEK;
-    printf("Listening on 0.0.0.0:%d\n", server.port);
+    printf("[INFO] Listening on 0.0.0.0:%d\n", server.port);
     while (true)
         events_loop(&server);
 }

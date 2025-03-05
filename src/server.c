@@ -122,6 +122,22 @@ void events_loop(server_t *server)
     }
 }
 
+static int load_anon_home(server_t *server)
+{
+    char *homepath;
+
+    homepath = realpath(server->anonymous_default_path, NULL);
+    if (homepath == NULL) {
+        fprintf(stderr, "myftp: invalid anonymous home path\n");
+        return -1;
+    }
+    strcpy(server->anonymous_default_path, homepath);
+    free(homepath);
+    printf("[INFO] Account 'Anonymous' home is: %s\n",
+        server->anonymous_default_path);
+    return 0;
+}
+
 int init_server(server_t *server)
 {
     const int reuse = 1;
@@ -132,7 +148,7 @@ int init_server(server_t *server)
     };
 
     server->server_fd = socket(AF_INET, SOCK_STREAM, 0);
-    if (server->server_fd == -1)
+    if (server->server_fd == -1 || load_anon_home(server) == -1)
         return -1;
     if (setsockopt(server->server_fd, SOL_SOCKET, SO_REUSEADDR,
         &reuse, sizeof(reuse)) == -1)
