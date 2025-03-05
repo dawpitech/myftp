@@ -37,7 +37,7 @@ void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
     write_msg_to_client(client->control_fd, msg_buf);
 }
 
-static void ls_child(const client_t *client, const char *args)
+static void ls_to_client(const client_t *client, const char *args)
 {
     FILE *ls;
     int chr;
@@ -51,13 +51,10 @@ static void ls_child(const client_t *client, const char *args)
         write(client->data_trf_fd, &chr, 1);
         chr = fgetc(ls);
     }
-    exit(0);
 }
 
 void cmd_list_handler(client_t *client, const char *args)
 {
-    pid_t pid;
-
     (void) !args;
     if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg_to_client(client->control_fd,
@@ -66,10 +63,7 @@ void cmd_list_handler(client_t *client, const char *args)
     }
     write_msg_to_client(client->control_fd,
         "150 Data connection already open; starting transfer.");
-    pid = fork();
-    if (pid == 0)
-        ls_child(client, args);
-    waitpid(-pid, NULL, WUNTRACED);
+    ls_to_client(client, args);
     printf("[INFO] Closing data transfer socket.\n");
     write_msg_to_client(client->control_fd, "226 Closing data connection.");
     close(client->data_fd);
@@ -78,7 +72,7 @@ void cmd_list_handler(client_t *client, const char *args)
     client->data_trf_fd = -1;
 }
 
-static void retr_child(const client_t *client, const char *args)
+static void write_file_to_client(const client_t *client, const char *args)
 {
     FILE *content;
     int chr;
@@ -92,13 +86,10 @@ static void retr_child(const client_t *client, const char *args)
         write(client->data_trf_fd, &chr, 1);
         chr = fgetc(content);
     }
-    exit(0);
 }
 
 void cmd_retr_handler(client_t *client, const char *args)
 {
-    pid_t pid;
-
     (void) !args;
     if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg_to_client(client->control_fd,
@@ -107,10 +98,7 @@ void cmd_retr_handler(client_t *client, const char *args)
     }
     write_msg_to_client(client->control_fd,
         "150 Data connection already open; starting transfer.");
-    pid = fork();
-    if (pid == 0)
-        retr_child(client, args);
-    waitpid(-pid, NULL, WUNTRACED);
+    write_file_to_client(client, args);
     printf("[INFO] Closing data transfer socket.\n");
     write_msg_to_client(client->control_fd, "226 Closing data connection.");
     close(client->data_fd);
