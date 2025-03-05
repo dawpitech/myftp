@@ -61,6 +61,7 @@ void cmd_syst_handler(client_t *client, const char *_);
 void cmd_stor_handler(client_t *client, const char *args);
 void cmd_help_handler(client_t *client, const char *args);
 void cmd_port_handler(client_t *client, const char *args);
+void cmd_dele_handler(client_t *client, const char *args);
 
 static const command_t COMMANDS[] = {
     {"USER", cmd_user_handler, false,
@@ -87,7 +88,7 @@ static const command_t COMMANDS[] = {
         "Do nothing"},
     {"HELP", cmd_help_handler, false,
         "Print this help message"},
-    {"DELE", NULL, true,
+    {"DELE", cmd_dele_handler, true,
         "Delete a file on the server"},
     {"PORT", cmd_port_handler, true,
         "Enable active mode for data transfer"},

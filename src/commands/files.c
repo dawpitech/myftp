@@ -5,6 +5,7 @@
 ** data.c
 */
 
+#include <errno.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -116,4 +117,16 @@ void cmd_stor_handler(client_t *client, const char *args)
     close(client->data_trf_fd);
     client->data_fd = -1;
     client->data_trf_fd = -1;
+}
+
+void cmd_dele_handler(client_t *client, const char *args)
+{
+    errno = 0;
+    if (unlink(args) == -1) {
+        write_msg_to_client(client->control_fd,
+            "550 Requested action not taken.");
+    } else {
+        write_msg_to_client(client->control_fd,
+            "250 Requested file action okay, completed.");
+    }
 }
