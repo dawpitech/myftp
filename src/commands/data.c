@@ -129,7 +129,7 @@ static void copy_file_content(const client_t *client, const char *arg)
     snprintf((char *) &filename_buff, BUFSIZ, "%s/%s",
     client->currPath, arg);
     src = fdopen(client->data_trf_fd, "r");
-    dest = fopen(filename_buff, "r");
+    dest = fopen(filename_buff, "w");
     chr = fgetc(src);
     while (chr != EOF) {
         fputc(chr, dest);
