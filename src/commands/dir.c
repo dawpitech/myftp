@@ -26,17 +26,17 @@ void cmd_cdup_handler(client_t *client, const char *_)
     cmd_cwd_handler(client, "..");
 }
 
-void compute_new_path(client_t *client, const char *path)
+void cmd_cwd_handler(client_t *client, const char *args)
 {
     char new_path[PATH_MAX] = {0};
     char *realpath_buff;
 
-    if (path[0] == '/') {
-        realpath_buff = realpath(path, NULL);
+    if (args[0] == '/') {
+        realpath_buff = realpath(args, NULL);
     } else {
         strcpy(new_path, client->currPath);
         strcat(new_path, "/");
-        strcat(new_path, path);
+        strcat(new_path, args);
         realpath_buff = realpath(new_path, NULL);
         if (realpath_buff == NULL) {
             write_msg_to_client(client->control_fd, "550 Error occurred.");
@@ -45,11 +45,6 @@ void compute_new_path(client_t *client, const char *path)
     }
     strcpy(client->currPath, realpath_buff);
     free(realpath_buff);
-}
-
-void cmd_cwd_handler(client_t *client, const char *args)
-{
-    compute_new_path(client, args);
     write_msg_to_client(client->control_fd,
         "250 Requested file action okay, completed.");
 }
