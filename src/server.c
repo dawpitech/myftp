@@ -16,6 +16,7 @@
 
 #include "server.h"
 
+#include <ntw_utils.h>
 #include <stdlib.h>
 
 static client_t *get_empty_client_slot(server_t *server)
@@ -46,7 +47,7 @@ static void searching_new_clients(server_t *server)
         strcpy(client->currPath, realpath(server->anonymous_default_path,
             NULL));
         printf("[INFO] New client connection\n");
-        write_msg_to_client(client->control_fd, "220 Ready to server user.");
+        write_msg(client, "220", "Ready to serve user.");
     }
 }
 
