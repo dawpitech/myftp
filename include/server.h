@@ -15,7 +15,7 @@
 
     #define CRLF "\r\n"
 
-    #define SERVER_MAX_CLIENTS 32
+    #define SERVER_MAX_CLIENTS 128
 
 typedef struct {
     char username[MAX_USERNAME];
