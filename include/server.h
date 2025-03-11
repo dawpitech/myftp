@@ -26,6 +26,7 @@ typedef struct {
     struct sockaddr_in data_sock;
     int data_trf_fd;
     bool is_auth;
+    char home[PATH_MAX];
 } client_t;
 
 typedef struct {

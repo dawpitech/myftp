@@ -13,6 +13,14 @@
 
 #include "server.h"
 
+static bool is_path_allowed(char const *home, char const *newpath)
+{
+    char const *real_newpath = realpath(newpath, NULL);
+    if (real_newpath == NULL)
+        return false;
+    return strncmp(home, real_newpath, strlen(home)) == 0;
+}
+
 void cmd_pwd_handler(client_t *client, __attribute__((unused)) const char *_)
 {
     char buffer[512];
@@ -35,6 +43,10 @@ static int check_for_path_errors(const char *args, const char *realpath_buff,
     }
     if (realpath_buff == NULL) {
         write_msg_to_client(client->control_fd, "550 Error occurred.");
+        return -1;
+    }
+    if (!is_path_allowed(client->home, realpath_buff)) {
+        write_msg_to_client(client->control_fd, "550 Requested action not taken.");
         return -1;
     }
     return 0;

@@ -27,6 +27,14 @@ static client_t *get_empty_client_slot(server_t *server)
     return NULL;
 }
 
+static void init_client(client_t *client, const server_t *server)
+{
+    client->data_fd = -1;
+    client->data_trf_fd = -1;
+    strcpy(client->username, "");
+    strcpy(client->home, server->anonymous_default_path);
+}
+
 static void searching_new_clients(server_t *server)
 {
     const struct sockaddr_in client_addr = {0};
@@ -41,9 +49,7 @@ static void searching_new_clients(server_t *server)
         client = get_empty_client_slot(server);
         client->control_fd = accept(server->server_fd,
             (struct sockaddr*) &client_addr, &client_len);
-        client->data_fd = -1;
-        client->data_trf_fd = -1;
-        strcpy(client->username, "");
+        init_client(client, server);
         strcpy(client->currPath, realpath(server->anonymous_default_path,
             NULL));
         printf("[INFO] New client connection\n");
