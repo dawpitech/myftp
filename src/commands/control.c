@@ -61,7 +61,7 @@ void cmd_port_handler(client_t *client, const char *args)
         return;
     }
     printf("[INFO] Connected to remote %s:%d\n", ip, port);
-    write_msg_to_client(client->control_fd, "220 OK.");
+    write_msg_to_client(client->control_fd, "200 OK.");
 }
 
 void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
