@@ -7,6 +7,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -15,9 +16,7 @@
 #include <sys/poll.h>
 
 #include "server.h"
-
-#include <ntw_utils.h>
-#include <stdlib.h>
+#include "network.h"
 
 static client_t *get_empty_client_slot(server_t *server)
 {

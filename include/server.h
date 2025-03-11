@@ -21,7 +21,7 @@ typedef enum {
     UNKNOWN,
     ACTIVE,
     PASSIVE
-} data_modes_e;
+} data_modes_e_t;
 
 typedef struct {
     char username[MAX_USERNAME];
@@ -31,7 +31,7 @@ typedef struct {
     int data_fd;
     struct sockaddr_in data_sock;
     int data_trf_fd;
-    data_modes_e data_mode;
+    data_modes_e_t data_mode;
     bool is_auth;
     char home[PATH_MAX];
 } client_t;

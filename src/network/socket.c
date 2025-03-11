@@ -2,17 +2,16 @@
 ** EPITECH PROJECT, 2025
 ** myftp
 ** File description:
-** utils.c
+** socket.c
 */
 
-#include <stdarg.h>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/poll.h>
 
-#include "ntw_utils.h"
+#include "network.h"
 
-static const char*mode_str(const data_modes_e mode)
+static const char *mode_str(const data_modes_e_t mode)
 {
     switch (mode) {
         default:
@@ -25,26 +24,10 @@ static const char*mode_str(const data_modes_e mode)
     }
 }
 
-void write_msg(const client_t *client, const char *code, const char *fmt, ...)
+void close_data_sock(client_t *client)
 {
-    va_list printf_args;
-    va_list logs_args_cpy;
-
-    va_start(printf_args, fmt);
-    va_copy(logs_args_cpy, printf_args);
-    dprintf(client->control_fd, "%s ", code);
-    vdprintf(client->control_fd, fmt, printf_args);
-    dprintf(client->control_fd, "%s", CRLF);
-    va_end(printf_args);
-    printf("[ -> ] %s ", code);
-    vprintf(fmt, logs_args_cpy);
-    printf("%s", CRLF);
-    va_end(logs_args_cpy);
-}
-
-void close_data(client_t *client)
-{
-    printf("[INFO] Closing %s data connection.\n", mode_str(client->data_mode));
+    printf("[INFO] Closing %s data connection.\n",
+        mode_str(client->data_mode));
     if (client->data_fd != -1)
         close(client->data_fd);
     if (client->data_fd != -1)
@@ -54,7 +37,7 @@ void close_data(client_t *client)
     client->data_mode = UNKNOWN;
 }
 
-int accept_passive_data(client_t *client)
+int accept_data_sock(client_t *client)
 {
     socklen_t client_len = sizeof(client->data_sock);
     struct pollfd data_poll = {

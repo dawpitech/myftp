@@ -16,6 +16,7 @@
 static bool is_path_allowed(char const *home, char const *newpath)
 {
     char const *real_newpath = realpath(newpath, NULL);
+
     if (real_newpath == NULL)
         return false;
     return strncmp(home, real_newpath, strlen(home)) == 0;
@@ -38,7 +39,8 @@ static int check_for_path_errors(const char *args, const char *realpath_buff,
     const client_t *client)
 {
     if (strlen(args) == 0) {
-        write_msg_to_client(client->control_fd, "550 Requested action not taken.");
+        write_msg_to_client(client->control_fd,
+            "550 Requested action not taken.");
         return -1;
     }
     if (realpath_buff == NULL) {
@@ -46,7 +48,8 @@ static int check_for_path_errors(const char *args, const char *realpath_buff,
         return -1;
     }
     if (!is_path_allowed(client->home, realpath_buff)) {
-        write_msg_to_client(client->control_fd, "550 Requested action not taken.");
+        write_msg_to_client(client->control_fd,
+            "550 Requested action not taken.");
         return -1;
     }
     return 0;
