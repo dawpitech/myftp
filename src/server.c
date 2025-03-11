@@ -37,7 +37,7 @@ static void searching_new_clients(server_t *server)
         .events = POLLIN
     };
 
-    if (poll(&server_poll, 1, 10) != 0) {
+    if (poll(&server_poll, 1, 1) != 0) {
         client = get_empty_client_slot(server);
         client->control_fd = accept(server->server_fd,
             (struct sockaddr*) &client_addr, &client_len);
@@ -99,7 +99,7 @@ static void update_client_data_fd(client_t *client)
 
     if (client->data_fd == -1)
         return;
-    if (poll(&data_poll, 1, 10) == 0)
+    if (poll(&data_poll, 1, 1) == 0)
         return;
     client->data_trf_fd = accept(client->data_fd,
             (struct sockaddr*) &client->data_sock, &client_len);
@@ -117,7 +117,7 @@ void events_loop(server_t *server)
         client_poll.fd = client->control_fd;
         client_poll.events = POLLIN;
         update_client_data_fd(client);
-        if (poll(&client_poll, 1, 10) == 0)
+        if (poll(&client_poll, 1, 1) == 0)
             continue;
         reply_client(client);
     }
