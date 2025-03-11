@@ -26,6 +26,20 @@ void cmd_cdup_handler(client_t *client, const char *_)
     cmd_cwd_handler(client, "..");
 }
 
+static int check_for_path_errors(const char *args, const char *realpath_buff,
+    const client_t *client)
+{
+    if (strlen(args) == 0) {
+        write_msg_to_client(client->control_fd, "550 Requested action not taken.");
+        return -1;
+    }
+    if (realpath_buff == NULL) {
+        write_msg_to_client(client->control_fd, "550 Error occurred.");
+        return -1;
+    }
+    return 0;
+}
+
 void cmd_cwd_handler(client_t *client, const char *args)
 {
     char new_path[PATH_MAX] = {0};
@@ -38,10 +52,8 @@ void cmd_cwd_handler(client_t *client, const char *args)
         strcat(new_path, "/");
         strcat(new_path, args);
         realpath_buff = realpath(new_path, NULL);
-        if (realpath_buff == NULL) {
-            write_msg_to_client(client->control_fd, "550 Error occurred.");
+        if (check_for_path_errors(args, realpath_buff, client) == -1)
             return;
-        }
     }
     strcpy(client->currPath, realpath_buff);
     free(realpath_buff);
