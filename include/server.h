@@ -17,6 +17,12 @@
 
     #define SERVER_MAX_CLIENTS 128
 
+typedef enum {
+    UNKNOWN,
+    ACTIVE,
+    PASSIVE
+} data_modes_e;
+
 typedef struct {
     char username[MAX_USERNAME];
     char currPath[PATH_MAX];
@@ -25,6 +31,7 @@ typedef struct {
     int data_fd;
     struct sockaddr_in data_sock;
     int data_trf_fd;
+    data_modes_e data_mode;
     bool is_auth;
     char home[PATH_MAX];
 } client_t;

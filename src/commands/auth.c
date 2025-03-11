@@ -10,6 +10,7 @@
 #include <unistd.h>
 
 #include "auth.h"
+#include "ntw_utils.h"
 #include "server.h"
 
 static const auth_t *get_id_from_username(const char *username)
@@ -53,8 +54,9 @@ void cmd_pass_handler(client_t *client, const char *password)
 void cmd_quit_handler(client_t *client,
     __attribute__((unused)) const char *_)
 {
+    if (client->data_mode != UNKNOWN)
+        close_data(client);
     close(client->control_fd);
-    if (client->data_fd != -1)
-        close(client->data_fd);
+    memset(client, 0, sizeof(client_t));
     printf("[INFO] Client connection closed\n");
 }

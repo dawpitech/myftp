@@ -95,22 +95,6 @@ static void reply_client(client_t *client)
         write_msg_to_client(client->control_fd, "500 Syntax Error");
 }
 
-static void update_client_data_fd(client_t *client)
-{
-    socklen_t client_len = sizeof(client->data_sock);
-    struct pollfd data_poll = {
-        .fd = client->data_fd,
-        .events = POLLIN
-    };
-
-    if (client->data_fd == -1)
-        return;
-    if (poll(&data_poll, 1, 1) == 0)
-        return;
-    client->data_trf_fd = accept(client->data_fd,
-            (struct sockaddr*) &client->data_sock, &client_len);
-}
-
 void events_loop(server_t *server)
 {
     client_t *client;
@@ -122,7 +106,6 @@ void events_loop(server_t *server)
         client = &server->clients[x];
         client_poll.fd = client->control_fd;
         client_poll.events = POLLIN;
-        update_client_data_fd(client);
         if (poll(&client_poll, 1, 1) == 0)
             continue;
         reply_client(client);

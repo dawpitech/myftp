@@ -6,6 +6,7 @@
 */
 
 #include <errno.h>
+#include <ntw_utils.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -29,18 +30,9 @@ static int ls_to_client(const client_t *client, const char *args)
     return WEXITSTATUS(pclose(ls));
 }
 
-static void close_data_con(client_t *client)
-{
-    printf("[INFO] Closing data transfer socket.\n");
-    close(client->data_fd);
-    close(client->data_trf_fd);
-    client->data_fd = -1;
-    client->data_trf_fd = -1;
-}
-
 void cmd_list_handler(client_t *client, const char *args)
 {
-    (void) !args;
+    accept_passive_data(client);
     if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg_to_client(client->control_fd,
             "425 Rejecting data connection.");
@@ -55,7 +47,7 @@ void cmd_list_handler(client_t *client, const char *args)
         write_msg_to_client(client->control_fd,
             "226 Closing data connection.");
     }
-    close_data_con(client);
+    close_data(client);
 }
 
 static int verify_content(const FILE *content, const client_t *client)
@@ -91,14 +83,14 @@ static void write_file_to_client(const client_t *client, const char *args)
 
 void cmd_retr_handler(client_t *client, const char *args)
 {
-    (void) !args;
+    accept_passive_data(client);
     if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg_to_client(client->control_fd,
             "425 Rejecting data connection.");
         return;
     }
     write_file_to_client(client, args);
-    close_data_con(client);
+    close_data(client);
 }
 
 static void copy_file_content(const client_t *client, const char *arg)
@@ -123,6 +115,7 @@ static void copy_file_content(const client_t *client, const char *arg)
 
 void cmd_stor_handler(client_t *client, const char *args)
 {
+    accept_passive_data(client);
     if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg_to_client(client->control_fd,
             "425 Rejecting data connection.");
@@ -132,7 +125,7 @@ void cmd_stor_handler(client_t *client, const char *args)
     "150 Data connection already open; starting transfer.");
     copy_file_content(client, args);
     write_msg_to_client(client->control_fd, "226 Closing data connection.");
-    close_data_con(client);
+    close_data(client);
 }
 
 void cmd_dele_handler(client_t *client, const char *args)

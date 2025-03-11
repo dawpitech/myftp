@@ -62,6 +62,15 @@ void cmd_port_handler(client_t *client, const char *args)
     }
     printf("[INFO] Connected to remote %s:%d\n", ip, port);
     write_msg_to_client(client->control_fd, "200 OK.");
+    client->data_mode = ACTIVE;
+}
+
+static void pasv_client_setup(client_t *client)
+{
+    client->data_sock.sin_family = AF_INET;
+    client->data_sock.sin_port = htons(0);
+    client->data_sock.sin_addr.s_addr = htonl(INADDR_ANY);
+    client->data_fd = socket(AF_INET, SOCK_STREAM, 0);
 }
 
 void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
@@ -69,10 +78,7 @@ void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
     char msg_buf[BUFSIZ];
     socklen_t len = sizeof(client->data_sock);
 
-    client->data_sock.sin_family = AF_INET;
-    client->data_sock.sin_port = htons(0);
-    client->data_sock.sin_addr.s_addr = htonl(INADDR_ANY);
-    client->data_fd = socket(AF_INET, SOCK_STREAM, 0);
+    pasv_client_setup(client);
     if (bind(client->data_fd, (struct sockaddr*) &client->data_sock,
         sizeof(client->data_sock)) == -1) {
         write_msg_to_client(client->control_fd, "421 Service not available.");
@@ -86,4 +92,5 @@ void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
         "(127,0,0,1,%d,%d)", ntohs(client->data_sock.sin_port) / 256,
         ntohs(client->data_sock.sin_port) % 256);
     write_msg_to_client(client->control_fd, msg_buf);
+    client->data_mode = PASSIVE;
 }
