@@ -58,6 +58,18 @@ void cmd_list_handler(client_t *client, const char *args)
     close_data_con(client);
 }
 
+static int verify_content(const FILE *content, const client_t *client)
+{
+    if (content == NULL) {
+        write_msg_to_client(client->control_fd,
+        "550 Requested action not taken.");
+        return -1;
+    }
+    write_msg_to_client(client->control_fd,
+    "150 Data connection already open; starting transfer.");
+    return 0;
+}
+
 static void write_file_to_client(const client_t *client, const char *args)
 {
     FILE *content;
@@ -67,11 +79,14 @@ static void write_file_to_client(const client_t *client, const char *args)
     snprintf((char *) &filename_buff, BUFSIZ, "%s/%s",
         client->currPath, args);
     content = fopen(filename_buff, "r");
+    if (verify_content(content, client) == -1)
+        return;
     chr = fgetc(content);
     while (chr != EOF) {
         write(client->data_trf_fd, &chr, 1);
         chr = fgetc(content);
     }
+    write_msg_to_client(client->control_fd, "226 Closing data connection.");
 }
 
 void cmd_retr_handler(client_t *client, const char *args)
@@ -82,10 +97,7 @@ void cmd_retr_handler(client_t *client, const char *args)
             "425 Rejecting data connection.");
         return;
     }
-    write_msg_to_client(client->control_fd,
-        "150 Data connection already open; starting transfer.");
     write_file_to_client(client, args);
-    write_msg_to_client(client->control_fd, "226 Closing data connection.");
     close_data_con(client);
 }
 
