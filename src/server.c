@@ -14,7 +14,6 @@
 #include <arpa/inet.h>
 #include <bits/socket.h>
 #include <netinet/in.h>
-#include <sys/poll.h>
 
 #include "server.h"
 #include "network.h"
@@ -40,21 +39,15 @@ static void searching_new_clients(server_t *server)
     const struct sockaddr_in client_addr = {0};
     socklen_t client_len = sizeof(client_addr);
     client_t *client;
-    struct pollfd server_poll = {
-        .fd = server->server_fd,
-        .events = POLLIN
-    };
 
-    if (poll(&server_poll, 1, 1) != 0) {
-        client = get_empty_client_slot(server);
-        client->control_fd = accept(server->server_fd,
-            (struct sockaddr*) &client_addr, &client_len);
-        init_client(client, server);
-        strcpy(client->currPath, realpath(server->anonymous_default_path,
-            NULL));
-        printf("[INFO] New client connection\n");
-        write_msg(client, "220", "Ready to serve user.");
-    }
+    client = get_empty_client_slot(server);
+    client->control_fd = accept(server->server_fd,
+        (struct sockaddr*) &client_addr, &client_len);
+    init_client(client, server);
+    strcpy(client->currPath, realpath(server->anonymous_default_path,
+        NULL));
+    printf("[INFO] New client connection\n");
+    write_msg(client, "220", "Ready to serve user.");
 }
 
 bool client_cmd_handler(const command_t *command, const char *buffer,
@@ -89,20 +82,35 @@ static void reply_client(client_t *client)
         process_client(client);
 }
 
+static void add_to_poll(poll_config_t *poll_config,
+    const int client_fd, client_t *client)
+{
+    poll_config->polls[poll_config->size].fd = client_fd;
+    poll_config->polls[poll_config->size].events = POLLIN;
+    if (client != NULL)
+        poll_config->clients[poll_config->size] = client;
+    poll_config->size += 1;
+}
+
 void events_loop(server_t *server)
 {
-    client_t *client;
-    struct pollfd client_poll = {0};
+    poll_config_t poll_config = {0};
 
-    client_poll.events = POLLIN;
-    searching_new_clients(server);
-    for (int x = 0; x < SERVER_MAX_CLIENTS
-        && server->clients[x].control_fd != 0; x++) {
-        client = &server->clients[x];
-        client_poll.fd = client->control_fd;
-        if (poll(&client_poll, 1, 1) == 0)
+    add_to_poll(&poll_config, server->server_fd, NULL);
+    for (int i = 0; i < SERVER_MAX_CLIENTS; i++) {
+        if (server->clients[i].control_fd == 0)
             continue;
-        reply_client(client);
+        add_to_poll(&poll_config, server->clients[i].control_fd,
+            &server->clients[i]);
+    }
+    poll(poll_config.polls, poll_config.size, -1);
+    for (size_t i = 0; i < poll_config.size; i++) {
+        if (poll_config.polls[i].revents == 0)
+            continue;
+        if (i == 0)
+            searching_new_clients(server);
+        else
+            reply_client(poll_config.clients[i]);
     }
 }
 

@@ -12,14 +12,6 @@
 #include "network.h"
 #include "server.h"
 
-//TODO: check return value
-/*void write_msg_to_client(const int client_control_fd, const char *str)
-{
-    (void) !write(client_control_fd, str, strlen(str));
-    (void) !write(client_control_fd, CRLF, strlen(CRLF));
-    printf("[ -> ] %s\n", str);
-}*/
-
 void cmd_type_handler(client_t *client, const char *type)
 {
     if (strcmp(type, "I") != 0)

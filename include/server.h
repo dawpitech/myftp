@@ -12,6 +12,7 @@
     #include <stdbool.h>
     #include <linux/limits.h>
     #include <netinet/ip.h>
+    #include <sys/poll.h>
 
     #define CRLF "\r\n"
 
@@ -41,6 +42,12 @@ typedef struct client_s {
 } client_t;
 
 typedef struct {
+    struct pollfd polls[SERVER_MAX_CLIENTS + 1];
+    client_t *clients[SERVER_MAX_CLIENTS + 1];
+    size_t size;
+} poll_config_t;
+
+typedef struct {
     int server_fd;
     unsigned short port;
     char anonymous_default_path[PATH_MAX];
@@ -57,7 +64,6 @@ typedef struct {
 int init_server(server_t *server);
 bool client_cmd_handler(const command_t *command, const char *buffer,
     client_t *client);
-//void write_msg_to_client(int client_control_fd, const char *str);
 void events_loop(server_t *server);
 
 void cmd_user_handler(client_t *client, const char *username);
