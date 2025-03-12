@@ -26,7 +26,7 @@ void panic_close_client(client_t *client)
 
 int write_welcome(const client_t *client)
 {
-    const char* msg = "220 Ready to serve user." CRLF;
+    const char *msg = "220 Ready to serve user." CRLF;
     const size_t msg_len = strlen(msg);
 
     if (write(client->control_fd, msg, msg_len) <= 0)
