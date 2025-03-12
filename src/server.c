@@ -76,9 +76,14 @@ bool client_cmd_handler(const command_t *command, const char *buffer,
 
 static void reply_client(client_t *client)
 {
-    if (read(client->control_fd, client->cmd_buffer +
-        client->cmd_buffer_offset, BUFSIZ - client->cmd_buffer_offset) < 1)
+    const long readable_bytes = read(client->control_fd, client->cmd_buffer +
+        client->cmd_buffer_offset, BUFSIZ - client->cmd_buffer_offset);
+
+    if (readable_bytes <= 0) {
+        printf("[INFO] Connection died, closing\n");
+        memset(client, 0, sizeof(client_t));
         return;
+    }
     printf("[ <- ] %s", client->cmd_buffer);
     parse_client_input(client);
     while (client->should_be_processed)
