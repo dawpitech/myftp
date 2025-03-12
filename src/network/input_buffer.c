@@ -52,7 +52,7 @@ void process_client(client_t *client)
             cmd_found = true;
         }
     if (!cmd_found)
-        write_msg_to_client(client->control_fd, "500 Syntax Error");
+        write_msg(client, "500", "Syntax Error");
     client->should_be_processed = false;
     parse_client_input(client);
 }

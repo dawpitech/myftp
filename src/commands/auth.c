@@ -26,17 +26,17 @@ void cmd_user_handler(client_t *client, const char *username)
     const auth_t *id = get_id_from_username(username);
 
     if (id == NULL) {
-        write_msg_to_client(client->control_fd, "331 Password required");
+        write_msg(client, "331", "Password required");
         return;
     }
     strcpy(client->username, username);
     if (id->password_needed) {
-        write_msg_to_client(client->control_fd, "331 Password required");
+        write_msg(client, "331", "Password required");
         return;
     }
     client->is_auth = true;
     printf("[INFO] USER %s LOGGED IN\n", client->username);
-    write_msg_to_client(client->control_fd, "230 User logged in, proceed.");
+    write_msg(client, "230", "User logged in, proceed.");
 }
 
 void cmd_pass_handler(client_t *client, const char *password)
@@ -44,11 +44,11 @@ void cmd_pass_handler(client_t *client, const char *password)
     const auth_t *id = get_id_from_username(client->username);
 
     if (id == NULL || strcmp(id->password, password) != 0) {
-        write_msg_to_client(client->control_fd, "530 Not logged in.");
+        write_msg(client, "530", "Not logged in.");
         return;
     }
     client->is_auth = true;
-    write_msg_to_client(client->control_fd, "230 User logged in, proceed.");
+    write_msg(client, "230", "User logged in, proceed.");
 }
 
 void cmd_quit_handler(client_t *client,

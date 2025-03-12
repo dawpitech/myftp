@@ -57,7 +57,7 @@ typedef struct {
 int init_server(server_t *server);
 bool client_cmd_handler(const command_t *command, const char *buffer,
     client_t *client);
-void write_msg_to_client(int client_control_fd, const char *str);
+//void write_msg_to_client(int client_control_fd, const char *str);
 void events_loop(server_t *server);
 
 void cmd_user_handler(client_t *client, const char *username);

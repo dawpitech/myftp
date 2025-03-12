@@ -11,6 +11,7 @@
 #include <string.h>
 #include <linux/limits.h>
 
+#include "network.h"
 #include "server.h"
 
 static bool is_path_allowed(char const *home, char const *newpath)
@@ -24,34 +25,23 @@ static bool is_path_allowed(char const *home, char const *newpath)
 
 void cmd_pwd_handler(client_t *client, __attribute__((unused)) const char *_)
 {
-    char buffer[512];
-
-    sprintf(buffer, "257 %s", realpath(client->currPath, NULL));
-    write_msg_to_client(client->control_fd, buffer);
+    write_msg(client, "257", "%s", realpath(client->currPath, NULL));
 }
 
-void cmd_cdup_handler(client_t *client, const char *_)
+void cmd_cdup_handler(client_t *client, __attribute__((unused)) const char *_)
 {
     cmd_cwd_handler(client, "..");
 }
 
 static int check_for_path_errors(const char *args, const char *realpath_buff,
-    const client_t *client)
+    client_t *client)
 {
-    if (strlen(args) == 0) {
-        write_msg_to_client(client->control_fd,
-            "550 Requested action not taken.");
-        return -1;
-    }
-    if (realpath_buff == NULL) {
-        write_msg_to_client(client->control_fd, "550 Error occurred.");
-        return -1;
-    }
-    if (!is_path_allowed(client->home, realpath_buff)) {
-        write_msg_to_client(client->control_fd,
-            "550 Requested action not taken.");
-        return -1;
-    }
+    if (strlen(args) == 0)
+        return write_msg(client, "550", "Requested action not taken.");
+    if (realpath_buff == NULL)
+        return write_msg(client, "550", "Error occurred.");
+    if (!is_path_allowed(client->home, realpath_buff))
+        return write_msg(client, "550", "Requested action not taken.");
     return 0;
 }
 
@@ -72,6 +62,5 @@ void cmd_cwd_handler(client_t *client, const char *args)
     }
     strcpy(client->currPath, realpath_buff);
     free(realpath_buff);
-    write_msg_to_client(client->control_fd,
-        "250 Requested file action okay, completed.");
+    write_msg(client, "250", "Requested file action okay, completed.");
 }

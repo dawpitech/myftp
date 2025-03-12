@@ -63,11 +63,11 @@ bool client_cmd_handler(const command_t *command, const char *buffer,
     if (strncasecmp(command->name, buffer, strlen(command->name)) != 0)
         return false;
     if (command->handler == NULL) {
-        write_msg_to_client(client->control_fd, "502 Not yet implemented");
+        write_msg(client, "502", "Not yet implemented");
         return true;
     }
     if (command->need_auth && !client->is_auth) {
-        write_msg_to_client(client->control_fd, "530 Not logged in.");
+        write_msg(client, "530", "530 Not logged in.");
         return true;
     }
     command->handler(client, buffer + strlen(command->name) + 1);
@@ -80,8 +80,7 @@ static void reply_client(client_t *client)
         client->cmd_buffer_offset, BUFSIZ - client->cmd_buffer_offset);
 
     if (readable_bytes <= 0) {
-        printf("[INFO] Connection died, closing\n");
-        memset(client, 0, sizeof(client_t));
+        panic_close_client(client);
         return;
     }
     printf("[ <- ] %s", client->cmd_buffer);

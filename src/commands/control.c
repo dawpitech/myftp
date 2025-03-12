@@ -10,6 +10,7 @@
 #include <string.h>
 #include <arpa/inet.h>
 
+#include "network.h"
 #include "server.h"
 
 static void handle_addr_token(const char *token, const int idx, char *ip,
@@ -27,7 +28,7 @@ static void handle_addr_token(const char *token, const int idx, char *ip,
 }
 
 static void parse_client_addr(char *ip, unsigned short *port,
-    const char *raw_args, const client_t *client)
+    const char *raw_args, client_t *client)
 {
     char *token;
     char arg[BUFSIZ] = {0};
@@ -36,7 +37,7 @@ static void parse_client_addr(char *ip, unsigned short *port,
     token = strtok(arg, ",");
     for (int i = 0; i < 6; i++) {
         if (token == NULL) {
-            write_msg_to_client(client->control_fd, "530 Syntax Error");
+            write_msg(client, "530", "Syntax Error");
             return;
         }
         handle_addr_token(token, i, ip, port);
@@ -57,12 +58,12 @@ void cmd_port_handler(client_t *client, const char *args)
     client->data_trf_fd = client->data_fd;
     if (connect(client->data_fd, (struct sockaddr*) &client->data_sock,
     sizeof(client->data_sock)) == -1) {
-        write_msg_to_client(client->control_fd, "421 Service not available.");
+        write_msg(client, "421", "Service not available.");
         return;
     }
     printf("[INFO] Connected to remote %s:%d\n", ip, port);
-    write_msg_to_client(client->control_fd, "200 OK.");
     client->data_mode = ACTIVE;
+    write_msg(client, "200", "OK.");
 }
 
 static void pasv_client_setup(client_t *client)
@@ -75,22 +76,20 @@ static void pasv_client_setup(client_t *client)
 
 void cmd_pasv_handler(client_t *client, __attribute__((unused)) const char *_)
 {
-    char msg_buf[BUFSIZ];
     socklen_t len = sizeof(client->data_sock);
 
     pasv_client_setup(client);
     if (bind(client->data_fd, (struct sockaddr*) &client->data_sock,
         sizeof(client->data_sock)) == -1) {
-        write_msg_to_client(client->control_fd, "421 Service not available.");
+        write_msg(client, "421", "Service not available.");
         return;
         }
     getsockname(client->data_fd, (struct sockaddr*) &client->data_sock, &len);
     listen(client->data_fd, 1);
     printf("[INFO] Port %d opened for passive data transport\n",
         ntohs(client->data_sock.sin_port));
-    snprintf((char *) &msg_buf, BUFSIZ, "227 Entering Passive Mode "
-        "(127,0,0,1,%d,%d)", ntohs(client->data_sock.sin_port) / 256,
-        ntohs(client->data_sock.sin_port) % 256);
-    write_msg_to_client(client->control_fd, msg_buf);
     client->data_mode = PASSIVE;
+    write_msg(client, "227", "Entering Passive Mode (127,0,0,1,%d,%d)",
+        ntohs(client->data_sock.sin_port) / 256,
+        ntohs(client->data_sock.sin_port) % 256);
 }
