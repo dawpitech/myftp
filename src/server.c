@@ -47,7 +47,7 @@ static void searching_new_clients(server_t *server)
     strcpy(client->currPath, realpath(server->anonymous_default_path,
         NULL));
     printf("[INFO] New client connection\n");
-    write_msg(client, "220", "Ready to serve user.");
+    write_welcome(client);
 }
 
 bool client_cmd_handler(const command_t *command, const char *buffer,

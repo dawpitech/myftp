@@ -24,6 +24,16 @@ void panic_close_client(client_t *client)
     printf("[INFO] Connection died, closing\n");
 }
 
+int write_welcome(const client_t *client)
+{
+    const char* msg = "220 Ready to serve user." CRLF;
+    const size_t msg_len = strlen(msg);
+
+    if (write(client->control_fd, msg, msg_len) <= 0)
+        return -1;
+    return 0;
+}
+
 int write_msg(client_t *client, const char *code, const char *fmt, ...)
 {
     va_list printf_args;

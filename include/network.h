@@ -10,6 +10,7 @@
 
     #include "server.h"
 
+int write_welcome(const client_t *client);
 int write_msg(client_t *client, const char *code, const char *fmt,
     ...);
 
