@@ -8,10 +8,18 @@
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "network.h"
 #include "server.h"
+
+static bool is_path_allowed(char const *home, char const *newpath)
+{
+    if (newpath == NULL)
+        return false;
+    return strncmp(home, newpath, strlen(home)) == 0;
+}
 
 static int ls_to_client(const client_t *client, const char *args)
 {
@@ -101,7 +109,7 @@ static void copy_file_content(const client_t *client, const char *arg)
     FILE *dest;
 
     snprintf((char *) &filename_buff, BUFSIZ, "%s/%s",
-    client->currPath, arg);
+        client->currPath, arg);
     src = fdopen(client->data_trf_fd, "r");
     dest = fopen(filename_buff, "w");
     chr = fgetc(src);
@@ -129,13 +137,33 @@ void cmd_stor_handler(client_t *client, const char *args)
     close_data_sock(client);
 }
 
+static void compute_dele_path(char *path_buffer, const char *given_path,
+    const client_t *client)
+{
+    if (given_path[0] == '/') {
+        strcpy(path_buffer, given_path);
+        return;
+    }
+    snprintf(path_buffer, BUFSIZ, "%s/%s",
+        client->currPath, given_path);
+}
+
 void cmd_dele_handler(client_t *client, const char *args)
 {
-    errno = 0;
-    if (unlink(args) == -1) {
+    char path_buff[BUFSIZ] = {0};
+    char *dele_path;
+
+    compute_dele_path(path_buff, args, client);
+    dele_path = realpath(path_buff, NULL);
+    if (!is_path_allowed(client->home, dele_path)) {
+        write_msg(client, "550", "Requested action not taken.");
+        return;
+    }
+    if (unlink(path_buff) == -1) {
         write_msg(client, "550", "Requested action not taken.");
     } else {
         write_msg(client, "250",
             "250 Requested file action okay, completed.");
     }
+    free(dele_path);
 }
