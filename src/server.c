@@ -5,6 +5,7 @@
 ** server.c
 */
 
+// ReSharper disable CppDFAConstantConditions
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,25 +74,60 @@ static bool client_cmd_handler(const command_t *command, const char *buffer,
     return true;
 }
 
-static void reply_client(client_t *client)
+static void parse_client_buffer(client_t *client, char *buff_not_read)
 {
-    char buffer[BUFSIZ] = {0};
-    unsigned long buff_len;
-    bool cmd_found = false;
 
-    if (read(client->control_fd, buffer, BUFSIZ) < 1)
-        return;
-    printf("[ <- ] %s", buffer);
-    buff_len = strlen(buffer);
-    buffer[buff_len - 2] = '\0';
-    buffer[buff_len - 1] = '\0';
-    for (size_t i = 0; i < COMMANDS_SIZE; i++)
-        if (client_cmd_handler(&COMMANDS[i], buffer, client) == true) {
-            cmd_found = true;
+    const size_t buff_len = strlen(client->cmd_buffer);
+    size_t idx = 0;
+
+    for (; idx < buff_len; idx++) {
+        if (client->cmd_buffer[idx] == '\r' && idx + 1 < buff_len && client->cmd_buffer[idx + 1] == '\n') {
+            idx += 2;
+            strncpy(client->cmd, client->cmd_buffer, idx - 1);
+            client->cmd[idx - 1] = '\0';
+            client->cmd[idx - 2] = '\0';
+            client->should_be_processed = true;
             break;
         }
-    if (!cmd_found)
-        write_msg_to_client(client->control_fd, "500 Syntax Error");
+    }
+    if (idx < buff_len)
+        strcat(buff_not_read, &client->cmd_buffer[idx]);
+    if (!client->should_be_processed)
+        strcat(buff_not_read, client->cmd_buffer);
+}
+
+static void parse_client_input(client_t *client)
+{
+    char buff_not_read[BUFSIZ] = {0};
+
+    client->should_be_processed = false;
+    memset(client->cmd, 0, BUFSIZ);
+    parse_client_buffer(client, buff_not_read);
+    memset(client->cmd_buffer, 0, BUFSIZ);
+    strcpy(client->cmd_buffer, buff_not_read);
+    client->cmd_buffer_offset = strlen(buff_not_read);
+    //printf("[INFO] Current command: %s\n", client->cmd);
+    //printf("[INFO] Command buffer: %s\n", client->cmd_buffer);
+}
+
+static void reply_client(client_t *client)
+{
+    bool cmd_found = false;
+
+    //printf("Writing in buffer with offset of: %lu\n", client->cmd_buffer_offset);
+    if (read(client->control_fd, client->cmd_buffer +
+        client->cmd_buffer_offset, BUFSIZ - client->cmd_buffer_offset) < 1)
+        return;
+    printf("[ <- ] '%s'\n", client->cmd_buffer);
+    parse_client_input(client);
+    while (client->should_be_processed) {
+        for (size_t i = 0; i < COMMANDS_SIZE && !cmd_found; i++)
+            if (client_cmd_handler(&COMMANDS[i], client->cmd, client) == true)
+                cmd_found = true;
+        if (!cmd_found)
+            write_msg_to_client(client->control_fd, "500 Syntax Error");
+        parse_client_input(client);
+    }
 }
 
 void events_loop(server_t *server)
@@ -99,12 +135,12 @@ void events_loop(server_t *server)
     client_t *client;
     struct pollfd client_poll = {0};
 
+    client_poll.events = POLLIN;
     searching_new_clients(server);
     for (int x = 0; x < SERVER_MAX_CLIENTS
         && server->clients[x].control_fd != 0; x++) {
         client = &server->clients[x];
         client_poll.fd = client->control_fd;
-        client_poll.events = POLLIN;
         if (poll(&client_poll, 1, 1) == 0)
             continue;
         reply_client(client);

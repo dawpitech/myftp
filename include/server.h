@@ -23,7 +23,7 @@ typedef enum {
     PASSIVE
 } data_modes_e_t;
 
-typedef struct {
+typedef struct client_s {
     char username[MAX_USERNAME];
     char currPath[PATH_MAX];
     int control_fd;
@@ -34,6 +34,10 @@ typedef struct {
     data_modes_e_t data_mode;
     bool is_auth;
     char home[PATH_MAX];
+    char cmd_buffer[BUFSIZ];
+    size_t cmd_buffer_offset;
+    char cmd[BUFSIZ];
+    bool should_be_processed;
 } client_t;
 
 typedef struct {
