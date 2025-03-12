@@ -6,15 +6,20 @@
 */
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
 #include <netinet/ip.h>
+#include <sys/wait.h>
 
 #include "myftp.h"
 #include "server.h"
+
+void sigchld_handler(__attribute__((unused)) int sig)
+{
+    while (waitpid(-1, NULL, WNOHANG) > 0);
+}
 
 static int print_help(void)
 {
@@ -44,7 +49,5 @@ int main(const int argc, const char *argv[])
     strcpy(server.anonymous_default_path, argv[2]);
     if (init_server(&server) == -1)
         return EXIT_FAILURE_TEK;
-    printf("[INFO] Listening on 0.0.0.0:%d\n", server.port);
-    while (true)
-        events_loop(&server);
+    launch_server(&server);
 }

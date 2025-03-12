@@ -6,6 +6,8 @@
 */
 
 // ReSharper disable CppDFAConstantConditions
+// ReSharper disable CppDFAEndlessLoop
+#include <signal.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +18,7 @@
 #include <netinet/in.h>
 
 #include "server.h"
+#include "myftp.h"
 #include "network.h"
 
 static client_t *get_empty_client_slot(server_t *server)
@@ -151,4 +154,17 @@ int init_server(server_t *server)
     if (listen(server->server_fd, SERVER_MAX_CLIENTS) == -1)
         return -1;
     return 0;
+}
+
+void launch_server(server_t *server)
+{
+    struct sigaction sa;
+
+    sa.sa_handler = &sigchld_handler;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = SA_RESTART;
+    sigaction(SIGCHLD, &sa, NULL);
+    printf("[INFO] Listening on 0.0.0.0:%d\n", server->port);
+    while (true)
+        events_loop(server);
 }

@@ -25,6 +25,7 @@
             inetutils
             filezilla
             inetutils
+            hyperfine
             pkgs.linuxPackages_latest.perf
           ] ++ deps;
         };

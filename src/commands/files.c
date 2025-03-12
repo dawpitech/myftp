@@ -67,23 +67,29 @@ static void write_file_to_client(client_t *client, const char *args)
         client->currPath, args);
     content = fopen(filename_buff, "r");
     if (verify_content(content, client) == -1)
-        return;
+        exit(0);
     chr = fgetc(content);
     while (chr != EOF) {
         write(client->data_trf_fd, &chr, 1);
         chr = fgetc(content);
     }
     write_msg(client, "226", "Closing data connection.");
+    close_data_sock(client);
+    exit(0);
 }
 
 void cmd_retr_handler(client_t *client, const char *args)
 {
+    int pid;
+
     accept_data_sock(client);
     if (client->data_fd == -1 || client->data_trf_fd == -1) {
         write_msg(client, "425", "Rejecting data connection.");
         return;
     }
-    write_file_to_client(client, args);
+    pid = fork();
+    if (pid == 0)
+        write_file_to_client(client, args);
     close_data_sock(client);
 }
 

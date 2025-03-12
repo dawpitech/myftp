@@ -65,6 +65,7 @@ int init_server(server_t *server);
 bool client_cmd_handler(const command_t *command, const char *buffer,
     client_t *client);
 void events_loop(server_t *server);
+void launch_server(server_t *server);
 
 void cmd_user_handler(client_t *client, const char *username);
 void cmd_pass_handler(client_t *client, const char *password);

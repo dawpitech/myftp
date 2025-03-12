@@ -10,4 +10,6 @@
 
     #define EXIT_FAILURE_TEK 84
 
+void sigchld_handler(__attribute__((unused)) int sig);
+
 #endif //MYFTP_H
