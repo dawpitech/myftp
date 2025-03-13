@@ -35,7 +35,7 @@ static int ls_to_client(const client_t *client, const char *args)
         write(client->data_trf_fd, &chr, 1);
         chr = fgetc(ls);
     }
-    return WEXITSTATUS(pclose(ls));
+    return WIFEXITED(pclose(ls)) == true;
 }
 
 void cmd_list_handler(client_t *client, const char *args)
