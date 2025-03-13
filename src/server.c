@@ -39,7 +39,7 @@ static void init_client(client_t *client, const server_t *server)
 
 static void searching_new_clients(server_t *server)
 {
-    const struct sockaddr_in client_addr = {0};
+    struct sockaddr_in client_addr = {0};
     socklen_t client_len = sizeof(client_addr);
     client_t *client;
 
@@ -133,7 +133,7 @@ static int load_anon_home(server_t *server)
 int init_server(server_t *server)
 {
     const int reuse = 1;
-    const struct sockaddr_in socket_addr = {
+    struct sockaddr_in socket_addr = {
         .sin_family = AF_INET,
         .sin_port = htons(server->port),
         .sin_addr.s_addr = htonl(INADDR_ANY),

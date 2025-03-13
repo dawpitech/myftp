@@ -14,7 +14,9 @@ CFLAGS	+=	-Wundef
 CFLAGS	+=	-Wshadow
 CFLAGS	+=	-Wunreachable-code
 CFLAGS	+=	-Wmissing-prototypes
-CFLAGS	+=	-pedantic
+CFLAGS	+=	-Wunused-result
+CFLAGS	+=	-Wpedantic
+CFLAGS	+=	-Wcast-qual
 CFLAGS	+=	-I./include/
 BDIR	=	.build
 
