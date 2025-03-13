@@ -33,7 +33,7 @@ static int print_help(void)
 
 int main(const int argc, const char *argv[])
 {
-    server_t server = {0};
+    static server_t server = {0};
 
     setenv("LC_ALL", "C", 1);
     if (argc != 3)

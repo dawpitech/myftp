@@ -47,8 +47,7 @@ static void searching_new_clients(server_t *server)
     client->control_fd = accept(server->server_fd,
         (struct sockaddr*) &client_addr, &client_len);
     init_client(client, server);
-    strcpy(client->currPath, realpath(server->anonymous_default_path,
-        NULL));
+    realpath(server->anonymous_default_path, client->currPath);
     printf("[INFO] New client connection\n");
     write_welcome(client);
 }
@@ -119,15 +118,13 @@ void events_loop(server_t *server)
 
 static int load_anon_home(server_t *server)
 {
-    char *homepath;
+    char homepath_buff[PATH_MAX];
 
-    homepath = realpath(server->anonymous_default_path, NULL);
-    if (homepath == NULL) {
+    if (realpath(server->anonymous_default_path, homepath_buff) == NULL) {
         fprintf(stderr, "myftp: invalid anonymous home path\n");
         return -1;
     }
-    strcpy(server->anonymous_default_path, homepath);
-    free(homepath);
+    strcpy(server->anonymous_default_path, homepath_buff);
     printf("[INFO] Account 'Anonymous' home is: %s\n",
         server->anonymous_default_path);
     return 0;

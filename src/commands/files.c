@@ -151,11 +151,10 @@ static void compute_dele_path(char *path_buffer, const char *given_path,
 void cmd_dele_handler(client_t *client, const char *args)
 {
     char path_buff[BUFSIZ] = {0};
-    char *dele_path;
+    char delete_path[BUFSIZ];
 
     compute_dele_path(path_buff, args, client);
-    dele_path = realpath(path_buff, NULL);
-    if (!is_path_allowed(client->home, dele_path)) {
+    if (!is_path_allowed(client->home, realpath(path_buff, delete_path))) {
         write_msg(client, "550", "Requested action not taken.");
         return;
     }
@@ -165,5 +164,4 @@ void cmd_dele_handler(client_t *client, const char *args)
         write_msg(client, "250",
             "250 Requested file action okay, completed.");
     }
-    free(dele_path);
 }

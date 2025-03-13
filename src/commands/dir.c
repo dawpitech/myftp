@@ -16,16 +16,19 @@
 
 static bool is_path_allowed(char const *home, char const *newpath)
 {
-    char const *real_newpath = realpath(newpath, NULL);
+    char real_newpath[PATH_MAX];
 
-    if (real_newpath == NULL)
+    if (realpath(newpath, real_newpath) == NULL)
         return false;
     return strncmp(home, real_newpath, strlen(home)) == 0;
 }
 
 void cmd_pwd_handler(client_t *client, __attribute__((unused)) const char *_)
 {
-    write_msg(client, "257", "%s", realpath(client->currPath, NULL));
+    char path_buff[PATH_MAX];
+
+    realpath(client->currPath, path_buff);
+    write_msg(client, "257", "%s", path_buff);
 }
 
 void cmd_cdup_handler(client_t *client, __attribute__((unused)) const char *_)
@@ -48,19 +51,18 @@ static int check_for_path_errors(const char *args, const char *realpath_buff,
 void cmd_cwd_handler(client_t *client, const char *args)
 {
     char new_path[PATH_MAX] = {0};
-    char *realpath_buff;
+    char realpath_buff[PATH_MAX] = {0};
 
     if (args[0] == '/') {
-        realpath_buff = realpath(args, NULL);
+        realpath(args, realpath_buff);
     } else {
         strcpy(new_path, client->currPath);
         strcat(new_path, "/");
         strcat(new_path, args);
-        realpath_buff = realpath(new_path, NULL);
+        realpath(new_path, realpath_buff);
         if (check_for_path_errors(args, realpath_buff, client) == -1)
             return;
     }
     strcpy(client->currPath, realpath_buff);
-    free(realpath_buff);
     write_msg(client, "250", "Requested file action okay, completed.");
 }
